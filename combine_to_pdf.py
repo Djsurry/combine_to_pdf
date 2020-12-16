@@ -2,7 +2,7 @@ import os, sys
 
 if len(sys.argv) < 2:
 	print('Usage: combine_to_pdf.py <output_filename> -d <dpi>')
-	print('dpi argument is optional, specifies output dpi of pdf. Defaults to 30.')
+	print('dpi argument is optional, specifies output dpi of pdf. Defaults to 30. Use 0 for no compression')
 	quit()
 elif len(sys.argv) == 2:
 	dpi = 30
@@ -38,8 +38,11 @@ for f in files:
 		print(f'Skipping {f}, not jpg')
 
 os.system(f"convert {' '.join(files)} output.pdf")
-os.system(f"./shrinkpdf.sh output.pdf {output} {dpi}")
-d = (os.path.getsize('output.pdf')-os.path.getsize(output))*10**(-6)
-print(f'pdf shrunk by {round(d, 2)} MB')
+if dpi != 0:
+	os.system(f"./shrinkpdf.sh output.pdf {output} {dpi}")
+	d = (os.path.getsize('output.pdf')-os.path.getsize(output))/os.path.getsize('output.pdf')
+	print(f'pdf compressed by {round(d*100, 2)}%')
+else:
+	os.system(f'cp output.pdf {output}')
 print('Cleaning up...') 
 os.system('rm output.pdf')
